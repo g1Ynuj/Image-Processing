@@ -1,0 +1,103 @@
+1. get and set pixels in image processing
+  bit position: 
+  -> alpha 32-24
+  -> red 23-16
+  -> green 15-8
+  -> blue 7-0
+https://www.geeksforgeeks.org/image-processing-in-java-get-and-set-pixels/?ref=lbp
+
+2. to grayscale image
+https://www.geeksforgeeks.org/image-processing-in-java-colored-image-to-grayscale-image-conversion/
+
+
+3. to negative image
+https://www.geeksforgeeks.org/image-processing-in-java-colored-image-to-negative-image-conversion/
+
+
+4. gamma value formula
+https://www.dfstudios.co.uk/articles/programming/image-programming-algorithms/image-processing-algorithms-part-6-gamma-correction/
+
+
+5. sobel edge detecting
+https://stackoverflow.com/questions/41468661/sobel-edge-detecting-program-in-java
+
+static void sobelEdgeDetecting(int[][] pixels, int height, int width) {
+    BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    int[] pixel_of_3x3 = new int[9];
+
+    for (int y = 1; y < height-1; y++) {
+      for (int x = 1; x < width-1; x++) {
+        pixel_of_3x3[0] = pixels[y-1][x-1] & 0xff;
+        pixel_of_3x3[1] = pixels[y][x-1] & 0xff;
+        pixel_of_3x3[2] = pixels[y+1][x-1] & 0xff;
+        pixel_of_3x3[3] = pixels[y-1][x] & 0xff;
+        pixel_of_3x3[4] = pixels[y][x] & 0xff;
+        pixel_of_3x3[5] = pixels[y+1][x] & 0xff;
+        pixel_of_3x3[6] = pixels[y-1][x+1] & 0xff;
+        pixel_of_3x3[7] = pixels[y][x+1] & 0xff;
+        pixel_of_3x3[8] = pixels[y+1][x+1] & 0xff;
+
+        // -1 0 1
+        // -2 0 2
+        // -1 0 1
+        int gx = (((-1*pixel_of_3x3[0])+(0*pixel_of_3x3[3])+(1*pixel_of_3x3[6]))
+                +((-2*pixel_of_3x3[1])+(0*pixel_of_3x3[4])+(2*pixel_of_3x3[7]))
+                +((-1*pixel_of_3x3[2])+(0*pixel_of_3x3[5])+(1*pixel_of_3x3[8])));
+        // -1 -2 -1
+        //  0  0  0
+        //  1  2  1
+        int gy = (((-1*pixel_of_3x3[0])+(-2*pixel_of_3x3[3])+(-1*pixel_of_3x3[6]))
+                +((0*pixel_of_3x3[1])+(0*pixel_of_3x3[4])+(0*pixel_of_3x3[7]))
+                +((1*pixel_of_3x3[2])+(2*pixel_of_3x3[5])+(1*pixel_of_3x3[8])));
+
+        double gval = Math.sqrt((gx*gx)+(gy*gy));
+        int g = (int)(gval);
+
+        int p = (g << 16) | (g << 8) | g;
+
+        image.setRGB(x, y, p);
+      }
+    }
+    try {
+      File output = new File("output/sobel.png");
+      ImageIO.write(image, "png", output);
+    } catch(IOException e) {
+      System.out.println("Error: " + e);
+    }
+  }
+
+  static void get3x3MiddleFilter(int[][] pixels, int height, int width) {
+    /*
+      |0|3|6|   |(y-1,x-1)|(y-1,x)|(y-1,x+1)|
+      |1|4|7|   |(y  ,x-1)|(y , x)|(y  ,x+1)|
+      |2|5|8|   |(y+1,x-1)|(y+1,x)|(y+1,x+1)|
+    */
+    BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    int[] pixel_of_3x3 = new int[9];
+
+    for (int y = 1; y < height-1; y++) {
+      for (int x = 1; x < width-1; x++) {
+        pixel_of_3x3[0] = pixels[y-1][x-1] & 0xff;
+        pixel_of_3x3[1] = pixels[y][x-1] & 0xff;
+        pixel_of_3x3[2] = pixels[y+1][x-1] & 0xff;
+        pixel_of_3x3[3] = pixels[y-1][x] & 0xff;
+        pixel_of_3x3[4] = pixels[y][x] & 0xff;
+        pixel_of_3x3[5] = pixels[y+1][x] & 0xff;
+        pixel_of_3x3[6] = pixels[y-1][x+1] & 0xff;
+        pixel_of_3x3[7] = pixels[y][x+1] & 0xff;
+        pixel_of_3x3[8] = pixels[y+1][x+1] & 0xff;
+
+        Arrays.sort(pixel_of_3x3);
+        int max = pixel_of_3x3[pixel_of_3x3.length - 1];
+        int p = (pixel_of_3x3[max] << 16) | (pixel_of_3x3[max] << 8) | pixel_of_3x3[max];
+
+        image.setRGB(x, y, p);
+      }
+    }
+    try {
+      File output = new File("output/middle3x3.png");
+      ImageIO.write(image, "png", output);
+    } catch(IOException e) {
+      System.out.println("Error: " + e);
+    }
+  }
